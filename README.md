@@ -1,7 +1,7 @@
 # Infectious Disease Simulation
 
-Basic set of classes to try and capture the behavior of the propagation of an infectious disease through a population
+Basic set of classes to try and capture the behavior of the propagation of an infectious disease through a population.
 
-Files:
-simulation.py
-sampleSimulation.py
+#### Files  
+simulation.py – collection of classes for running simulation  
+sampleSimulation.py – script to use classes from `simulation` to run a simulation

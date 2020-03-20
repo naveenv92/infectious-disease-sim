@@ -162,15 +162,15 @@ class runSimulation:
 
 	def __init__(self, simulation):
 		self._simulation = simulation
-		self._numNI = []
-		self._numInf = []
-		self._numRec = []
+		self._numNI = np.array([])
+		self._numInf = np.array([])
+		self._numRec = np.array([])
 
 	def singleSim(self, showSim=True, plot=True):
 		timesteps = 0
-		numNI = []
-		numInf = []
-		numRec = []
+		numNI = np.array([])
+		numInf = np.array([])
+		numRec = np.array([])
 
 		plt.rcParams['axes.linewidth'] = 3
 		plt.ion()
@@ -179,9 +179,9 @@ class runSimulation:
 
 		while currentInf > 0:
 			currentStats = self._simulation.statistics()
-			numNI.append(currentStats[0])
-			numInf.append(currentStats[1])
-			numRec.append(currentStats[2])
+			numNI = np.append(numNI, currentStats[0])
+			numInf = np.append(numInf, currentStats[1])
+			numRec = np.append(numRec, currentStats[2])
 			currentInf = currentStats[1]
 			timesteps += 1
 			
@@ -219,14 +219,14 @@ class runSimulation:
 
 			ax.legend()
 
-			plt.savefig('particle-simulator.png', dpi=300, bbox_inches='tight')
+			plt.savefig('simulation.png', dpi=300, bbox_inches='tight')
 			plt.show()
 
 	def multiSim(self, numOfSims=5, plot=True):
 
-		totalNumNI = []
-		totalNumInf = []
-		totalNumRec = []
+		totalNumNI = np.array([])
+		totalNumInf = np.array([])
+		totalNumRec = np.array([])
 
 		for i in range(numOfSims):
 			self.singleSim(showSim=False, plot=False)
@@ -252,5 +252,5 @@ class runSimulation:
 
 			ax.legend()
 
-			plt.savefig('particle-simulator.png', dpi=300, bbox_inches='tight')
+			plt.savefig('simulation.png', dpi=300, bbox_inches='tight')
 			plt.show()

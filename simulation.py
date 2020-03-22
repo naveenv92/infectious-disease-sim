@@ -14,7 +14,7 @@ class Particle:
 	# _isInfected -- boolean representing if particle in infected
 	# _isRecovered -- boolean representing if particle has recovered (and therefore, cannot be infected again)
 	# _numberOfInfections -- number of other particles infected
-	def __init__(self, x=0, y=0, vx=1, vy=1, r=2):
+	def __init__(self, x=0, y=0, vx=1, vy=1, r=5):
 		self._x = x
 		self._y = y
 		self._vx = vx
@@ -94,7 +94,7 @@ class Particle:
 		return self._isRecovered
 
 	## Increment the number of other particles infected
-	def infectOtherPerson(self):
+	def infectOtherParticle(self):
 		self._numberOfInfections += 1
 
 	## Returns the number of other particles infected -- used to calculate R_0 value
@@ -111,7 +111,7 @@ class Simulation:
 	# _tol -- tolerance around each particle for a collision
 	# _boxSize -- size of simulation box in each direction (i.e. 1 x 1, 2 x 2, 3 x 3, etc.)
 	# _speed -- maximum value of each velocity component (total speed is bounded between 0 and sqrt(2)*_speed)
-	def __init__(self, n=10, ninf=1, r=10, boxSize=1, speed=1, tol=0.1):
+	def __init__(self, n=100, ninf=1, r=5, boxSize=1, speed=1, tol=0.1):
 		self._n = n
 		self._particles = []
 		self._tol = tol
@@ -166,34 +166,34 @@ class Simulation:
 
 	## Move each particle and manage any collisions
 	def move(self, dt=1):
+
+		## Manage collisions between walls and other particles
+		def manageCollisions():
+			
+			# If particles hit the walls of the simulation box, bounce off
+			for i in self._particles:
+				if i.x() <= 0 or i.x() >= self._boxSize:
+					i.set_vx(-i.vx())
+				if i.y() <=0 or i.y() >= self._boxSize:
+					i.set_vy(-i.vy())
+
+			# Iterate through particles and manage collisions between pairs of particles
+			for i in range(len(self._particles)):
+				for j in range(i + 1, len(self._particles)):
+					particle_1 = self._particles[i]
+					particle_2 = self._particles[j]
+					if particle_1.x() - self._tol <= particle_2.x() <= particle_1.x() + self._tol and particle_1.y() - self._tol <= particle_2.y() <= particle_1.y() + self._tol:
+						# Infect other particle if current particle is infected and the other particle is not infected or recovered
+						if particle_1.isInfected() and not particle_2.isInfected() and not particle_2.isRecovered():
+							particle_1.infectOtherParticle()
+							particle_2.infect()
+						if particle_2.isInfected() and not particle_1.isInfected() and not particle_1.isRecovered():
+							particle_2.infectOtherParticle()
+							particle_1.infect()
+
 		for i in self._particles:
 			i.move(dt)
-		self.manageCollisions()
-
-	## Manage collisions between walls and other particles
-	def manageCollisions(self):
-		
-		# If particles hit the walls of the simulation box, bounce off
-		for i in self._particles:
-			if i.x() <= 0 or i.x() >= self._boxSize:
-				i.set_vx(-i.vx())
-			if i.y() <=0 or i.y() >= self._boxSize:
-				i.set_vy(-i.vy())
-
-		# Iterate through particles and manage collisions between pairs of particles
-		for i in range(len(self._particles)):
-			for j in range(i + 1, len(self._particles)):
-				particle_1 = self._particles[i]
-				particle_2 = self._particles[j]
-				if particle_1.x() - self._tol <= particle_2.x() <= particle_1.x() + self._tol and particle_1.y() - self._tol <= particle_2.y() <= particle_1.y() + self._tol:
-					# Infect other particle if current particle is infected and the other particle is not infected or recovered
-					if particle_1.isInfected() and not particle_2.isInfected() and not particle_2.isRecovered():
-						particle_1.infectOtherPerson()
-						particle_2.infect()
-					if particle_2.isInfected() and not particle_1.isInfected() and not particle_1.isRecovered():
-						particle_2.infectOtherPerson()
-						particle_1.infect()
-
+		manageCollisions()
 
 	## Returns important simulation statistics -- number not infected, number infected, number recovered, and average number infected (~R_0 value)
 	def statistics(self):

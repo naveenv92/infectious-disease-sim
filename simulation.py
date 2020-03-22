@@ -1,4 +1,4 @@
-# Graphical and numerical required libraries
+## Graphical and numerical required libraries
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -67,9 +67,11 @@ class Particle:
 	## Moves the particle by a timestep (default is 1) along its velocity vector and updates its position
 	# If infected, counts down timesteps until recovery
 	def move(self, dt=1):
+		# Update x and y coordinates
 		self._x += self._vx*dt
 		self._y += self._vy*dt
 
+		# If infected, increment countdown until recovery
 		if self._isInfected == True:
 			self._infectedCounter -= 1
 			if self._infectedCounter == 0:
@@ -78,6 +80,7 @@ class Particle:
 
 	## Infects particle if it not yet been infected and recovered, and sets a number of timesteps until recovery
 	def infect(self):
+		# Infect if particle has never been infected (not recovered)
 		if self._isRecovered == False and self._isInfected == False:
 			self._isInfected = True
 			self._infectedCounter = 30
@@ -94,86 +97,96 @@ class Particle:
 	def infectOtherPerson(self):
 		self._numberOfInfections += 1
 
-	## Returns the number of other particles infected
+	## Returns the number of other particles infected -- used to calculate R_0 value
 	def numOfInfections(self):
 		return self._numberOfInfections
 
 
+## Simulation class -- creates a simulation of a collection of Particle objects and keeps track of important simulation statistics
 class Simulation:
 
+	## Initialize simulation with a number of particles
+	# _n -- number of particles in the simulation
+	# _particles -- list of Particle objects in the simulation
+	# _tol -- tolerance around each particle for a collision
+	# _boxSize -- size of simulation box in each direction (i.e. 1 x 1, 2 x 2, 3 x 3, etc.)
+	# _speed -- maximum value of each velocity component (total speed is bounded between 0 and sqrt(2)*_speed)
 	def __init__(self, n=10, ninf=1, r=10, boxSize=1, speed=1, tol=0.1):
 		self._n = n
 		self._particles = []
 		self._tol = tol
 		self._boxSize = boxSize
 		self._speed = speed
+		
+		# Populate _particles with _n particles with random position and velocity
 		for _ in range(n):
 			vx = self._speed*np.random.random()
 			vy = self._speed*np.random.random()
+			
+			# Randomize the direction of each velocity component by choosing either -1 or 1
 			direction_x = 2*(np.random.randint(2) - 0.5)
 			direction_y = 2*(np.random.randint(2) - 0.5)
 			self._particles.append(Particle(self._boxSize*np.random.random(), self._boxSize*np.random.random(), direction_x*vx, direction_y*vy, r))
 
+		# Infect a number of particles based on input value ninf
 		for i in range(ninf):
 			self._particles[i].infect()
 
+	## Returns the number of particles
 	def n(self):
 		return self._n
 
+	## Returns the size of the simulation box
 	def getBoxSize(self):
 		return self._boxSize
 
-	def x_coords(self):
+	## Returns arrays of x and y coordinates of non-infected particles
+	def coords(self):
 		x_coords = []
-		for i in self._particles:
-			if not i.isInfected():
-				x_coords.append(i.x())
-		return x_coords
-
-	def x_coords_inf(self):
-		x_coords_inf = []
-		for i in self._particles:
-			if i.isInfected():
-				x_coords_inf.append(i.x())
-		return x_coords_inf
-
-	def y_coords(self):
 		y_coords = []
 		for i in self._particles:
 			if not i.isInfected():
+				x_coords.append(i.x())
 				y_coords.append(i.y())
-		return y_coords
+		return x_coords, y_coords
 
-	def y_coords_inf(self):
+	## Returns arrays of x and y coordinates of infected particles
+	def coords_inf(self):
+		x_coords_inf = []
 		y_coords_inf = []
 		for i in self._particles:
 			if i.isInfected():
+				x_coords_inf.append(i.x())
 				y_coords_inf.append(i.y())
-		return y_coords_inf
+		return x_coords_inf, y_coords_inf
 
+	## Returns size of particle for simulation (all are same size so return the first value)
 	def radii(self):
-		radii = []
-		for i in self._particles:
-			radii.append(i.r())
-		return radii
+		return self._particles[0].r()
 
+	## Move each particle and manage any collisions
 	def move(self, dt=1):
 		for i in self._particles:
 			i.move(dt)
 		self.manageCollisions()
 
+	## Manage collisions between walls and other particles
 	def manageCollisions(self):
+		
+		# If particles hit the walls of the simulation box, bounce off
 		for i in self._particles:
 			if i.x() <= 0 or i.x() >= self._boxSize:
 				i.set_vx(-i.vx())
 			if i.y() <=0 or i.y() >= self._boxSize:
 				i.set_vy(-i.vy())
 
+		# Iterate through particles and manage collisions between pairs of particles
 		for i in range(len(self._particles)):
 			for j in range(i + 1, len(self._particles)):
 				particle_1 = self._particles[i]
 				particle_2 = self._particles[j]
 				if particle_1.x() - self._tol <= particle_2.x() <= particle_1.x() + self._tol and particle_1.y() - self._tol <= particle_2.y() <= particle_1.y() + self._tol:
+					# Infect other particle if current particle is infected and the other particle is not infected or recovered
 					if particle_1.isInfected() and not particle_2.isInfected() and not particle_2.isRecovered():
 						particle_1.infectOtherPerson()
 						particle_2.infect()
@@ -182,12 +195,15 @@ class Simulation:
 						particle_1.infect()
 
 
+	## Returns important simulation statistics -- number not infected, number infected, number recovered, and average number infected (~R_0 value)
 	def statistics(self):
 		countInf = 0
 		countRec = 0
 		countNI = 0
 		avgInfections = 0
 		numOfInfectors = 1
+		
+		# Check status of each particle - for R_0 only count particles that have infected other particles
 		for i in self._particles:
 			if i.isInfected():
 				countInf += 1
@@ -232,8 +248,11 @@ class runSimulation:
 			timesteps += 1
 			
 			if showSim:
-				plt.scatter(self._simulation.x_coords(), self._simulation.y_coords(), s=self._simulation.radii()[0]**2, color='red')
-				plt.scatter(self._simulation.x_coords_inf(), self._simulation.y_coords_inf(), s=self._simulation.radii()[0]**2, color='black')
+				coords = self._simulation.coords()
+				coords_inf = self._simulation.coords_inf()
+				r = self._simulation.radii()**2
+				plt.scatter(coords[0], coords[1], s=r, color='red')
+				plt.scatter(coords_inf[0], coords_inf[1], s=r, color='black')
 				plt.xticks([])
 				plt.yticks([])
 				plt.xlim(-0.01, self._simulation.getBoxSize() + 0.01)

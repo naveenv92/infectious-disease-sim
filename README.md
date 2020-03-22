@@ -1,10 +1,12 @@
 # Infectious Disease Simulation
 
-Basic set of classes to try and capture the behavior of the propagation of an infectious disease through a population.
+Basic set of classes to try and capture the behavior of the propagation of an infectious disease through a population.  
+&nbsp;  
 
 ## Files  
 `simulation.py` – collection of classes for running simulation  
 `sampleSimulation.py` – sample script to use classes from `simulation` to run a simulation  
+&nbsp;  
 
 ## `class Particle` 
 ```python
@@ -95,6 +97,7 @@ Increment the number of particles infected by the current particle
 Particle.numOfInfections()
 ```
 Returns the number of particles infected by the current particle  
+&nbsp;  
 
 ## `class Simulation`
 ```python

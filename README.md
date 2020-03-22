@@ -103,8 +103,8 @@ Simulation(n=100, ninf=1, r=5, boxSize=1, speed=1, tol=0.1)
 `n` -- number of particles in the simulation box (default 100)
 `ninf` -- number of initially infected particles (default 1)
 `r` -- size of particle for viewing simulation (default 5)  
-`boxSize` -- size of simulation box in each direction <i>i.e.</i> $1 \times 1$, $2 \times 2$, $3 \times 3$, etc. (default 1)  
-`speed` -- maximum value of each velocity component, magnitude of speed is bounded by $[0, \sqrt{2}\cdot$`speed`$]$ (default 1)  
+`boxSize` -- size of simulation box in each direction <i>i.e.</i> 1 &times; 1, 2 &times; 2, 3 &times; 3, etc. (default 1)  
+`speed` -- maximum value of each velocity component, magnitude of speed is bounded by [0, &radic;2 &middot; `speed`] (default 1)  
 `tol` -- amount of tolerance around each particle used to determine collisions (default 0.1)  
 
 ```python
@@ -144,4 +144,4 @@ Returns a list of the form `[countNI, countInf, countRec, avgInfections]`:
 `countNI` -- number of non-infected particles at each timestep  
 `countInf` -- number of infected particles at each timestep  
 `countRec` -- number of recovered particles at each timestep  
-`avgInfections` -- average number of particles infected by each infected particle $(\sim R_0 \; \rm{value})$
+`avgInfections` -- average number of particles infected by each infected particle (~R<sub>0</sub> value)

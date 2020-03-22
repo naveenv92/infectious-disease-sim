@@ -270,7 +270,9 @@ class runSimulation:
 		self._numInf = numInf
 		self._numRec = numRec
 
-		print(self._simulation.statistics()[3])
+		r0_val = 'R_0 value: ' + str(self._simulation.statistics()[3])
+
+		np.savetxt('Simulation_Statistics.csv', np.c_[self._numNI, self._numInf, self._numRec], delimiter=',', header='Not Infected, Infected, Recovered', footer=r0_val, comments='')
 
 		if plot:
 			fig = plt.figure(figsize=(5,5))

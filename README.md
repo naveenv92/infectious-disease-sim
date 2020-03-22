@@ -108,7 +108,7 @@ Simulation(n=100, ninf=1, r=5, boxSize=1, speed=1, tol=0.1)
 ```
 `n` &ndash; number of particles in the simulation box (default `100`)  
 `ninf` &ndash; number of initially infected particles (default `1`)  
-`r` &ndash; size of particle for viewing simulation (default `5`)   
+`r` &ndash; size of particle for viewing simulation (default `5`)  
 `boxSize` &ndash; size of simulation box in each direction <i>i.e.</i> 1 &times; 1, 2 &times; 2, 3 &times; 3, etc. (default `1`)  
 `speed` &ndash; maximum value of each velocity component, magnitude of speed is bounded by [0, &radic;2 &middot; `speed`] (default `1`)  
 `tol` &ndash; amount of tolerance around each particle used to determine collisions (default `0.1`)  
@@ -161,7 +161,15 @@ runSimulation(simulation)
 `simulation` &ndash; `Simulation` object used to initialize class
 
 ```python
-singleSim(showSim=True, plot=True)
+runSimulation.singleSim(showSim=True, plot=True)
 ```
+Runs a single simulation and saves the resulting statistics as a `.csv`  file  
 `showSim` &ndash; boolean input for whether to show the simulation window (default `True`)  
-`plot` &ndash; boolean input for whether to plot final statistics (default `True`)
+`plot` &ndash; boolean input for whether to plot final statistics (default `True`)  
+
+```python
+runSimulation.multiSim(numOfSims=5, plot=True)
+```
+Runs multiple simulations and averages the statistics and saves as a `.csv` file  
+`numOfSims` &ndash; number of simulations to run (default `5`)  
+`plot` &ndash; boolean input for whether to plot final statistics (default `True`)  

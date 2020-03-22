@@ -14,11 +14,11 @@ Basic set of classes to try and capture the behavior of the propagation of an in
 ```python
 Particle(x=0, y=0, vx=1, vy=1, r=5)
 ```
-`x` &ndash; x-coordinate of particle (default 0)  
-`y` &ndash; y-coordinate of particle (default 0)  
-`vx` &ndash; x-component of particle velocity (default 1)  
-`vy` &ndash; y-component of particle velocity (default 1)  
-`r` &ndash; size of particle for viewing simulation (default 5)  
+`x` &ndash; x-coordinate of particle (default `0`)  
+`y` &ndash; y-coordinate of particle (default `0`)  
+`vx` &ndash; x-component of particle velocity (default `1`)  
+`vy` &ndash; y-component of particle velocity (default `1`)  
+`r` &ndash; size of particle for viewing simulation (default `5`)  
 
 ```python
 Particle.x()
@@ -73,7 +73,7 @@ Set the size of particle to `r`
 ```python
 Particle.move(dt)
 ```
-Move the particle by a timestep determined by `dt` (default is 1), and if infected, countdown until recovery  
+Move the particle by a timestep determined by `dt` (default is `1`), and if infected, countdown until recovery  
 
 ```python
 Particle.infect()
@@ -106,12 +106,12 @@ Returns the number of particles infected by the current particle
 ```python
 Simulation(n=100, ninf=1, r=5, boxSize=1, speed=1, tol=0.1)
 ```
-`n` &ndash; number of particles in the simulation box (default 100)
-`ninf` &ndash; number of initially infected particles (default 1)
-`r` &ndash; size of particle for viewing simulation (default 5)  
-`boxSize` &ndash; size of simulation box in each direction <i>i.e.</i> 1 &times; 1, 2 &times; 2, 3 &times; 3, etc. (default 1)  
-`speed` &ndash; maximum value of each velocity component, magnitude of speed is bounded by [0, &radic;2 &middot; `speed`] (default 1)  
-`tol` &ndash; amount of tolerance around each particle used to determine collisions (default 0.1)  
+`n` &ndash; number of particles in the simulation box (default `100`)
+`ninf` &ndash; number of initially infected particles (default `1`)
+`r` &ndash; size of particle for viewing simulation (default `5`)  
+`boxSize` &ndash; size of simulation box in each direction <i>i.e.</i> 1 &times; 1, 2 &times; 2, 3 &times; 3, etc. (default `1`)  
+`speed` &ndash; maximum value of each velocity component, magnitude of speed is bounded by [0, &radic;2 &middot; `speed`] (default `1`)  
+`tol` &ndash; amount of tolerance around each particle used to determine collisions (default `0.1`)  
 
 ```python
 Simulation.n()
@@ -150,4 +150,18 @@ Returns a list of the form `[countNI, countInf, countRec, avgInfections]`:
 `countNI` &ndash; number of non-infected particles at each timestep  
 `countInf` &ndash; number of infected particles at each timestep  
 `countRec` &ndash; number of recovered particles at each timestep  
-`avgInfections` &ndash; average number of particles infected by each infected particle (~R<sub>0</sub> value)
+`avgInfections` &ndash; average number of particles infected by each infected particle (~R<sub>0</sub> value)  
+&nbsp;  
+&nbsp;  
+
+## `class runSimulation`
+```python
+runSimulation(simulation)
+```
+`simulation` &ndash; `Simulation` object used to initialize class
+
+```python
+singleSim(showSim=True, plot=True)
+```
+`showSim` &ndash; boolean input for whether to show the simulation window (default `True`)  
+`plot` &ndash; boolean input for whether to plot final statistics (default `True`)

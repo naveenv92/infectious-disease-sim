@@ -5,8 +5,9 @@ Basic set of classes to try and capture the behavior of the propagation of an in
 &nbsp;  
 
 ## Files  
-`simulation.py` – collection of classes for running simulation  
-`sampleSimulation.py` – sample script to use classes from `simulation` to run a simulation  
+`simulation.py` &ndash; collection of classes for running simulation  
+`sampleSimulation.py` &ndash; sample script to use classes from `simulation` to run a simulation  
+`sampleSimulation.ipynb` &ndash; sample Jupyter notebook (functions same as `sampleSimulation.py`)
 &nbsp;  
 &nbsp;  
 

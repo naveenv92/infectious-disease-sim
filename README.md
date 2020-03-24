@@ -167,10 +167,3 @@ runSimulation.singleSim(showSim=True, plot=True)
 Runs a single simulation and saves the resulting statistics as a `.csv`  file  
 `showSim` &ndash; boolean input for whether to show the simulation window (default `True`)  
 `plot` &ndash; boolean input for whether to plot final statistics (default `True`)  
-
-```python
-runSimulation.multiSim(numOfSims=5, plot=True)
-```
-Runs multiple simulations and averages the statistics and saves as a `.csv` file  
-`numOfSims` &ndash; number of simulations to run (default `5`)  
-`plot` &ndash; boolean input for whether to plot final statistics (default `True`)  

@@ -1,5 +1,6 @@
 ## Graphical and numerical required libraries
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 ## Particle class -- keeps track of position, velocity, infection state, and number of other people infected
@@ -234,6 +235,8 @@ class runSimulation:
 		numInf = np.array([])
 		numRec = np.array([])
 
+		mpl.rcParams['font.family'] = 'Avenir'
+		plt.rcParams['font.size'] = 18
 		plt.rcParams['axes.linewidth'] = 3
 		plt.ion()
 
@@ -251,12 +254,13 @@ class runSimulation:
 				coords = self._simulation.coords()
 				coords_inf = self._simulation.coords_inf()
 				r = self._simulation.radii()**2
-				plt.scatter(coords[0], coords[1], s=r, color='red')
-				plt.scatter(coords_inf[0], coords_inf[1], s=r, color='black')
+				plt.scatter(coords[0], coords[1], s=r, color='#1e90ff')
+				plt.scatter(coords_inf[0], coords_inf[1], s=r, color='#ff4500')
 				plt.xticks([])
 				plt.yticks([])
 				plt.xlim(-0.01, self._simulation.getBoxSize() + 0.01)
 				plt.ylim(-0.01, self._simulation.getBoxSize() + 0.01)
+				plt.title('Infected: ' + str(int(numInf[-1])) + '  Recovered: ' + str(int(numRec[-1])))
 				plt.draw()
 				plt.pause(0.01)
 				plt.clf()
@@ -275,20 +279,31 @@ class runSimulation:
 		np.savetxt('Simulation_Statistics.csv', np.c_[self._numNI, self._numInf, self._numRec], delimiter=',', header='Not Infected, Infected, Recovered', footer=r0_val, comments='')
 
 		if plot:
-			fig = plt.figure(figsize=(5,5))
+			plt.rcParams['axes.linewidth'] = 2
+
+			fig = plt.figure(figsize=(5,4))
 			ax = fig.add_axes([0, 0, 1, 1])
 
-			ax.plot(np.arange(0, timesteps, 1), numInf, linewidth=2, label='Infected')
-			ax.plot(np.arange(0, timesteps, 1), numRec, linewidth=2, label='Recovered')
+			ax.spines['top'].set_visible(False)
+			ax.spines['right'].set_visible(False)
+
+			ax.xaxis.set_tick_params(which='major', size=10, width=2)
+			ax.yaxis.set_tick_params(which='major', size=10, width=2)
+
+			ax.fill_between(np.arange(0, timesteps, 1), numRec, 0, linewidth=0, color='#85c3ff', alpha=0.2)
+			ax.plot(np.arange(0, timesteps, 1), numRec, linewidth=3, color='#1e90ff', label='Recovered')
+			ax.fill_between(np.arange(0, timesteps, 1), numInf, 0, linewidth=0, color='#ffa381', alpha=0.2)
+			ax.plot(np.arange(0, timesteps, 1), numInf, linewidth=3, color='#ff4500', label='Infected')
 
 			ax.set_xlabel('Timesteps')
 			ax.set_ylabel('Number')
 
-			ax.set_ylim(0, self._simulation.n())
+			ax.set_xlim(-0.01*timesteps, 1.01*timesteps)
+			ax.set_ylim(-0.01*self._simulation.n(), 1.01*self._simulation.n())
 
-			ax.legend()
+			ax.legend(frameon=False)
 
-			plt.savefig('simulation.png', dpi=300, bbox_inches='tight')
+			plt.savefig('Simulation.png', dpi=300, bbox_inches='tight')
 			plt.show()
 
 	def multiSim(self, numOfSims=5, plot=True):

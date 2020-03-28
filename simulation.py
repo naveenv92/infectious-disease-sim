@@ -281,7 +281,7 @@ class runSimulation:
 		if plot:
 			plt.rcParams['axes.linewidth'] = 2
 
-			fig = plt.figure(figsize=(5,4))
+			fig = plt.figure(figsize=(6,4))
 			ax = fig.add_axes([0, 0, 1, 1])
 
 			ax.spines['top'].set_visible(False)
@@ -295,46 +295,13 @@ class runSimulation:
 			ax.fill_between(np.arange(0, timesteps, 1), numInf, 0, linewidth=0, color='#ffa381', alpha=0.2)
 			ax.plot(np.arange(0, timesteps, 1), numInf, linewidth=3, color='#ff4500', label='Infected')
 
-			ax.set_xlabel('Timesteps')
-			ax.set_ylabel('Number')
+			ax.set_xlabel('# of timesteps', labelpad=10)
+			ax.set_ylabel('# of particles', labelpad=10)
 
 			ax.set_xlim(-0.01*timesteps, 1.01*timesteps)
 			ax.set_ylim(-0.01*self._simulation.n(), 1.01*self._simulation.n())
 
-			ax.legend(frameon=False)
+			ax.legend(loc=2, frameon=False)
 
 			plt.savefig('Simulation.png', dpi=300, bbox_inches='tight')
-			plt.show()
-
-	def multiSim(self, numOfSims=5, plot=True):
-
-		totalNumNI = np.array([])
-		totalNumInf = np.array([])
-		totalNumRec = np.array([])
-
-		for i in range(numOfSims):
-			self.singleSim(showSim=False, plot=False)
-			totalNumNI += self._numNI
-			totalNumInf += self._numInf
-			totalNumRec += self._numRec
-
-		totalNumNI = [i/numOfSims for i in totalNumNI]
-		totalNumInf = [i/numOfSims for i in totalNumInf]
-		totalNumRec = [i/numOfSims for i in totalNumRec]
-
-		if plot:
-			fig = plt.figure(figsize=(5,5))
-			ax = fig.add_axes([0, 0, 1, 1])
-
-			ax.plot(np.arange(0, timesteps, 1), totalNumInf, linewidth=2, label='Infected')
-			ax.plot(np.arange(0, timesteps, 1), totalNumRec, linewidth=2, label='Recovered')
-
-			ax.set_xlabel('Timesteps')
-			ax.set_ylabel('Number')
-
-			ax.set_ylim(0, self._simulation.n())
-
-			ax.legend()
-
-			plt.savefig('simulation.png', dpi=300, bbox_inches='tight')
 			plt.show()

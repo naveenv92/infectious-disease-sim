@@ -16,9 +16,6 @@ class Particle:
         recovery_time (int): number of timesteps before recovery
         is_infected (bool): true when particle is infected
         is_recovered (bool): true when particle has recovered
-
-    Methods:
-
     """
 
     def __init__(self, x: float, y: float, vx: float, vy: float, recovery_time: int) -> None:
@@ -79,8 +76,9 @@ class Simulation:
     The Simulation object stores a collection of particles for simulation
 
     Attributes:
-
-    Methods:
+        box_size (float): length of side of simulation box
+        infections (int): number of initially infected particles
+        particles (List[Particle]): list of particle objects in simulation
     """
 
     def __init__(self, n: int, ninf: int, box_size: float, speed: float, recovery_time: int) -> None:
@@ -125,6 +123,9 @@ class Simulation:
         If x or y coordinates are outside the box, they are set to 0 and that velocity
         component is reversed. Collisions between particles are currently only used 
         to infect other healthy particles.
+
+        Parameters:
+            particle (Particle): particle object to check for collisions
         """
 
         if particle.x < 0:
@@ -143,7 +144,7 @@ class Simulation:
         for other_particle in self.particles:
             if particle == other_particle:
                 continue
-            elif np.sqrt((particle.x - other_particle.x)**2 + (particle.y - other_particle.y)**2) <= 0.1:
+            elif np.sqrt((particle.x - other_particle.x)**2 + (particle.y - other_particle.y)**2) <= 0.02:
                 if particle.is_infected:
                     other_particle.infect()
 
@@ -163,7 +164,7 @@ class Simulation:
                 num_infections += 1
         self.infections = num_infections
 
-    def run(self, dt: float) -> Tuple[List[float], List[float], List[float], List[float]]:
+    def run(self, dt: float) -> Tuple[List[float], List[float], List[float], List[float], int]:
         """
         Runs simulation until no particles are infected
 
@@ -171,42 +172,66 @@ class Simulation:
             dt (float): length of the timestep
 
         Returns:
-            x_healthy (List[List[float]]): x-coordinates of healthy particles at each timestep
-            y_healthy (List[List[float]]): y-coordinates of healthy particles at each timestep
-            x_inf (List[List[[float]]): x-coordinates of infected particles at each timestep
-            y_inf (List[List[[float]]): y-coordinates of infected particles at each timestep
+            x_healthy (List[float]): x-coordinates of healthy particles at each timestep
+            y_healthy (List[float]): y-coordinates of healthy particles at each timestep
+            x_inf (List[[float]): x-coordinates of infected particles at each timestep
+            y_inf (List[float]): y-coordinates of infected particles at each timestep
+            n_rec (List[int]): number of recovered particles at each timestep
         """
 
         x_healthy = []
         y_healthy = []
         x_inf = []
         y_inf = []
+        n_rec = []
 
         while self.infections > 0:
             x_healthy.append([])
             y_healthy.append([])
             x_inf.append([])
             y_inf.append([])
+            recovered = 0
             self.move(dt)
             for particle in self.particles:
                 if particle.is_infected:
                     x_inf[-1].append(particle.x)
                     y_inf[-1].append(particle.y)  
                 else:
+                    if particle.is_recovered:
+                        recovered += 1
                     x_healthy[-1].append(particle.x)
                     y_healthy[-1].append(particle.y)
+            n_rec.append(recovered)
 
-        return x_healthy, y_healthy, x_inf, y_inf
+        return x_healthy, y_healthy, x_inf, y_inf, n_rec
 
 
-def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float]):
+def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float], n_rec: List[int], box_size: float):
+    """
+    Shows an animated simulation of particles until all particles are healthy. Opens 
+    matplotlib window to show simulation and then plots the number of infected and 
+    recovered particles over time. You may directly unroll the return values from 
+    Simulation.run() with the function call show_simulation(*Simulation.run, box_size).
+
+    Parameters
+        x_healthy (List[float]): x-coordinates of healthy particles at each timestep
+        y_healthy (List[float]): y-coordinates of healthy particles at each timestep
+        x_inf (List[[float]): x-coordinates of infected particles at each timestep
+        y_inf (List[float]): y-coordinates of infected particles at each timestep
+        n_rec (List[int]): number of recovered particles at each timestep
+        box_size (float): length of side of simulation box
+    """
+
+    plt.style.use('./test.mplstyle')
     fig = plt.figure(figsize=(5,5))
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax = fig.add_subplot(111)
+    ax.set_xlim(-0.01*box_size, 1.01*box_size)
+    ax.set_ylim(-0.01*box_size, 1.01*box_size)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
-    healthy, = ax.plot([], [], 'o', color='blue')
-    inf, = ax.plot([], [], 'o', color='black')
+    healthy, = ax.plot([], [], 'o')
+    inf, = ax.plot([], [], 'o')
 
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
@@ -214,16 +239,23 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
         return healthy, inf
 
     ani = FuncAnimation(fig, animate, frames=range(len(x_healthy)), interval=100, repeat=False)
-    #ani.save('test.mp4')
+    #ani.save('test.mp4') # Uncomment if you would like save animation
+    plt.show()
+
+    timesteps = range(len(x_inf))
+    n_inf = [len(i) for i in x_inf]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    inf, = ax.plot(timesteps, n_inf)
+    ax.fill_between(x=timesteps, y1=n_inf, color=inf.get_color(), alpha=0.2)
+    rec, = ax.plot(timesteps, n_rec)
+    ax.fill_between(x=timesteps, y1=n_rec, color=rec.get_color(), alpha=0.2)
     plt.show()
 
 
-
-
 if __name__ == "__main__":
-    print('Generating simulation with 30 particles\n')
-    sim = Simulation(50, 1, 1, 0.1, 30)
-    print('Running simulation')
-    show_simulation(*sim.run(1))
+    sim = Simulation(200, 5, 1, 0.1, 50)
+    show_simulation(*sim.run(0.5), 1)
     
     

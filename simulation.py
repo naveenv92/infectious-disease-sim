@@ -241,7 +241,7 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     #ani.save('test.mp4') # Uncomment if you would like save animation
     plt.show()
 
-def plot_infections(x_inf: List[float], n_rec: List[float]):
+def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
     """
     Parameters:
         n_rec (List[int]): number of recovered particles at each timestep
@@ -252,18 +252,21 @@ def plot_infections(x_inf: List[float], n_rec: List[float]):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    inf, = ax.plot(timesteps, n_inf)
-    ax.fill_between(x=timesteps, y1=n_inf, color=inf.get_color(), alpha=0.2)
-    rec, = ax.plot(timesteps, n_rec)
-    ax.fill_between(x=timesteps, y1=n_rec, color=rec.get_color(), alpha=0.2)
+    inf, = ax.plot(timesteps, [i/n_tot for i in n_inf], linewidth=2)
+    ax.fill_between(x=timesteps, y1=[i/n_tot for i in n_inf], color=inf.get_color(), alpha=0.2)
+    rec, = ax.plot(timesteps, [i/n_tot for i in n_rec], linewidth=2)
+    ax.fill_between(x=timesteps, y1=[i/n_tot for i in n_rec], color=rec.get_color(), alpha=0.2)
+
+    ax.set_xlim(timesteps[0], timesteps[-1])
+    ax.set_ylim(0, 1.05)
     plt.show()
 
 
 if __name__ == "__main__":
-    sim = Simulation(500, 1, 0.02, 0.2, 40)
+    sim = Simulation(200, 1, 0.03, 0.2, 40)
     x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
-    show_simulation(x_healthy, y_healthy, x_inf, y_inf)
-    plot_infections(x_inf, n_rec)
+    #show_simulation(x_healthy, y_healthy, x_inf, y_inf)
+    plot_infections(x_inf, n_rec, 200)
     print('Reproductive Ratio (R0): %.2f' % r0)
     
     

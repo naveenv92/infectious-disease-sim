@@ -41,22 +41,19 @@ class Particle:
 
     def __str__(self) -> str:
         """Return string of Particle object to print."""
+
         return 'Particle x:%.2f y:%.2f vx:%.2f vy:%.2f' % (self.x, self.y, self.vx, self.vy)
 
     def __repr__(self) -> str:
         """Return string representation of Particle object."""
+
         return '<Particle object x:%.2f y:%.2f>' % (self.x, self.y)
 
-    def move(self, dt: float) -> None:
-        """
-        Moves the particle to its new position after a specified timestep.
+    def move(self) -> None:
+        """Moves the particle to its new position after a specified timestep."""
 
-        Parameters:
-            dt (float): length of timestep
-        """
-
-        self.x += self.vx*dt
-        self.y += self.vy*dt
+        self.x += self.vx
+        self.y += self.vy
         
         if self.is_infected:
             if self.infected_counter == 0:
@@ -100,8 +97,8 @@ class Simulation:
         for _ in range(n - ninf):
             x = np.random.random()
             y = np.random.random()
-            vx = speed*np.random.normal(scale=0.25)
-            vy = speed*np.random.normal(scale=0.25)
+            vx = (-2*speed*np.random.random() + speed)/10
+            vy = (-2*speed*np.random.random() + speed)/10
             self.particles.append(Particle(x, y, vx, vy, recovery_time))
         # Infected particles
         for _ in range(ninf):
@@ -147,31 +144,26 @@ class Simulation:
             if particle == other_particle:
                 continue
             elif np.sqrt((particle.x - other_particle.x)**2 + (particle.y - other_particle.y)**2) <= self.rad:
-                if particle.is_infected:
-                    particle.infect(other_particle)
+                if particle.is_infected and (particle.infected_counter <= particle.recovery_time - 7):
+                    if np.random.random() < 0.7:
+                        particle.infect(other_particle)
 
-    def move(self, dt: float) -> None:
+    def move(self) -> None:
         """
         Moves the simulation by one timestep.
-
-        Parameters:
-            dt (float): length of the timestep
         """
 
         num_infections = 0
         for particle in self.particles:
-            particle.move(dt)
+            particle.move()
             self._handle_collisions(particle)
             if particle.is_infected:
                 num_infections += 1
         self.infections = num_infections
 
-    def run(self, dt: float) -> Tuple[List[float], List[float], List[float], List[float], int, float]:
+    def run(self) -> Tuple[List[float], List[float], List[float], List[float], int, float]:
         """
         Runs simulation until no particles are infected
-
-        Parameters:
-            dt (float): length of the timestep
 
         Returns:
             x_healthy (List[float]): x-coordinates of healthy particles at each timestep
@@ -194,7 +186,7 @@ class Simulation:
             x_inf.append([])
             y_inf.append([])
             recovered = 0
-            self.move(dt)
+            self.move()
             for particle in self.particles:
                 if particle.is_infected:
                     x_inf[-1].append(particle.x)
@@ -216,7 +208,7 @@ class Simulation:
         return x_healthy, y_healthy, x_inf, y_inf, n_rec, r0
 
 
-def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float], n_rec: List[int]):
+def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float]):
     """
     Shows an animated simulation of particles until all particles are healthy. Opens 
     matplotlib window to show simulation and then plots the number of infected and 
@@ -228,19 +220,17 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
         y_healthy (List[float]): y-coordinates of healthy particles at each timestep
         x_inf (List[[float]): x-coordinates of infected particles at each timestep
         y_inf (List[float]): y-coordinates of infected particles at each timestep
-        n_rec (List[int]): number of recovered particles at each timestep
     """
 
-    plt.style.use('./test.mplstyle')
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(8,8))
     ax = fig.add_subplot(111)
     ax.set_xlim(-0.01, 1.01)
     ax.set_ylim(-0.01, 1.01)
     ax.set_xticks([])
     ax.set_yticks([])
 
-    healthy, = ax.plot([], [], 'o')
-    inf, = ax.plot([], [], 'o')
+    healthy, = ax.plot([], [], 'o', markersize=10)
+    inf, = ax.plot([], [], 'o', markersize=10)
 
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
@@ -251,6 +241,12 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     #ani.save('test.mp4') # Uncomment if you would like save animation
     plt.show()
 
+def plot_infections(x_inf: List[float], n_rec: List[float]):
+    """
+    Parameters:
+        n_rec (List[int]): number of recovered particles at each timestep
+    """
+    plt.style.use('fivethirtyeight')
     timesteps = range(len(x_inf))
     n_inf = [len(i) for i in x_inf]
 
@@ -264,9 +260,10 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
 
 
 if __name__ == "__main__":
-    sim = Simulation(100, 5, 0.01, 1, 50)
-    x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run(0.1)
-    show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec)
-    print(r0)
+    sim = Simulation(500, 1, 0.02, 0.2, 40)
+    x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
+    show_simulation(x_healthy, y_healthy, x_inf, y_inf)
+    plot_infections(x_inf, n_rec)
+    print('Reproductive Ratio (R0): %.2f' % r0)
     
     

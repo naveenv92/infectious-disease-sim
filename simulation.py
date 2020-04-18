@@ -1,5 +1,6 @@
 from typing import List, Tuple
 import numpy as np
+import matplotlib as mpl
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 
@@ -203,12 +204,15 @@ class Simulation:
             if particle.infections > 0:
                 r0 += particle.infections
                 infecting_particles += 1
-        r0 /= infecting_particles
+        if infecting_particles > 0:
+            r0 /= infecting_particles
+        else:
+            r0 = 0
 
         return x_healthy, y_healthy, x_inf, y_inf, n_rec, r0
 
 
-def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float], n_rec: List[float], n_tot: int):
+def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float], n_rec: List[float], n_tot: int, r0: float):
     """
     Shows an animated simulation of particles until all particles are healthy. Opens 
     matplotlib window to show simulation and then plots the number of infected and 
@@ -222,10 +226,17 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
         y_inf (List[float]): y-coordinates of infected particles at each timestep
         n_rec (List[float]): number of recovered particles at each timestep
         n_tot (int): total number of particles
+        r0 (float): reproductive ratio (R0) of infection
     """
+
+    mpl.rcParams['font.family'] = 'Avenir, sans-serif'
+    mpl.rcParams['font.size'] = 18
+    mpl.rcParams['axes.linewidth'] = 2
 
     fig = plt.figure(figsize=(10,6))
     
+    colors = ['#008fd5', '#fc4f30']
+
     # Plot of simulation box
     ax = fig.add_subplot(121)
     ax.set_xlim(-0.01, 1.01)
@@ -234,8 +245,8 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     ax.set_yticks([])
     ax.set_aspect('equal')
 
-    healthy, = ax.plot([], [], 'o', markersize=5)
-    inf, = ax.plot([], [], 'o', markersize=5)
+    healthy, = ax.plot([], [], 'o', markersize=5, color=colors[0])
+    inf, = ax.plot([], [], 'o', markersize=5, color=colors[1])
 
     # Plot of infections
     ax2 = fig.add_subplot(122)
@@ -243,8 +254,8 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     ax2.set_ylim(0, 1)
     ax2.set_aspect(len(x_healthy))
 
-    n_inf, = ax2.plot([], [], linestyle='-', linewidth=2)
-    n_recov, = ax2.plot([], [], linestyle='-', linewidth=2)
+    n_recov, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[0])
+    n_inf, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[1])
 
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
@@ -258,6 +269,7 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
 
     ani = FuncAnimation(fig, animate, frames=range(len(x_healthy)), interval=100, repeat=False)
     #ani.save('test.mp4') # Uncomment if you would like save animation
+    fig.suptitle(r'R$_0$: %.2f' % r0, y=0.9)
     plt.show()
 
 def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
@@ -284,10 +296,9 @@ def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
 
 
 if __name__ == "__main__":
-    sim = Simulation(100, 1, 0.05, 0.5, 40)
+    n_tot = 100
+    sim = Simulation(n_tot, 10, 0.04, 0.5, 20)
     x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
-    show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec, 400)
-    #plot_infections(x_inf, n_rec, 200)
-    print('Reproductive Ratio (R0): %.2f' % r0)
+    show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec, n_tot, r0)
     
     

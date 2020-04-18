@@ -257,12 +257,12 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     ax2.set_xlim(0, len(x_healthy) - 1)
     ax2.set_ylim(0, 1)
     ax2.set_aspect(len(x_healthy))
-    ax2.set_xlabel('Time', labelpad=10)
+    ax2.set_xlabel('Time', labelpad=2)
     ax2.set_ylabel('Fraction of Population', labelpad=10)
 
-    n_recov, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[0])
-    n_inf, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[1])
-    n_neverinf, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[2])
+    n_recov, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[0], label='Recovered')
+    n_inf, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[1], label='Infected')
+    n_neverinf, = ax2.plot([], [], linestyle='-', linewidth=2, color=colors[2], label='Healthy')
 
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
@@ -275,6 +275,7 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
         n_neverinf.set_data(np.append(n_neverinf.get_data()[0], i), np.append(n_neverinf.get_data()[1], 1 - len(x_inf[i])/n_tot - n_rec[i]/n_tot))
         ax2.fill_between(x=n_neverinf.get_data()[0], y1=n_neverinf.get_data()[1], color=n_neverinf.get_color(), alpha=0.2)
 
+    ax2.legend(bbox_to_anchor=(0.5, -0.18), loc=9, ncol=3, fancybox=False, frameon=False, framealpha=1.0, edgecolor='black', fontsize=16, columnspacing=0.5)
     ani = FuncAnimation(fig, animate, frames=range(len(x_healthy)), interval=100, repeat=False)
     fig.suptitle(r'R$_0$: %.2f' % r0, y=0.95)
     #ani.save('test.mp4', dpi=300) # Uncomment if you would like save animation

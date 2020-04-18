@@ -234,8 +234,8 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     ax.set_yticks([])
     ax.set_aspect('equal')
 
-    healthy, = ax.plot([], [], 'o', markersize=10)
-    inf, = ax.plot([], [], 'o', markersize=10)
+    healthy, = ax.plot([], [], 'o', markersize=5)
+    inf, = ax.plot([], [], 'o', markersize=5)
 
     # Plot of infections
     ax2 = fig.add_subplot(122)
@@ -249,8 +249,11 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
         inf.set_data(x_inf[i], y_inf[i])
+        ax2.collections.clear()
         n_inf.set_data(np.append(n_inf.get_data()[0], i), np.append(n_inf.get_data()[1], len(x_inf[i])/n_tot))
+        ax2.fill_between(x=n_inf.get_data()[0], y1=n_inf.get_data()[1], color=n_inf.get_color(), alpha=0.2)
         n_recov.set_data(np.append(n_recov.get_data()[0], i), np.append(n_recov.get_data()[1], n_rec[i]/n_tot))
+        ax2.fill_between(x=n_recov.get_data()[0], y1=n_recov.get_data()[1], color=n_recov.get_color(), alpha=0.2)
         return healthy, inf
 
     ani = FuncAnimation(fig, animate, frames=range(len(x_healthy)), interval=100, repeat=False)

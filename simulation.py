@@ -208,7 +208,7 @@ class Simulation:
         return x_healthy, y_healthy, x_inf, y_inf, n_rec, r0
 
 
-def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float]):
+def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[float], y_inf: List[float], n_rec: List[float], n_tot: int):
     """
     Shows an animated simulation of particles until all particles are healthy. Opens 
     matplotlib window to show simulation and then plots the number of infected and 
@@ -220,21 +220,37 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
         y_healthy (List[float]): y-coordinates of healthy particles at each timestep
         x_inf (List[[float]): x-coordinates of infected particles at each timestep
         y_inf (List[float]): y-coordinates of infected particles at each timestep
+        n_rec (List[float]): number of recovered particles at each timestep
+        n_tot (int): total number of particles
     """
 
-    fig = plt.figure(figsize=(8,8))
-    ax = fig.add_subplot(111)
+    fig = plt.figure(figsize=(10,6))
+    
+    # Plot of simulation box
+    ax = fig.add_subplot(121)
     ax.set_xlim(-0.01, 1.01)
     ax.set_ylim(-0.01, 1.01)
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_aspect('equal')
 
     healthy, = ax.plot([], [], 'o', markersize=10)
     inf, = ax.plot([], [], 'o', markersize=10)
 
+    # Plot of infections
+    ax2 = fig.add_subplot(122)
+    ax2.set_xlim(0, len(x_healthy) - 1)
+    ax2.set_ylim(0, 1)
+    ax2.set_aspect(len(x_healthy))
+
+    n_inf, = ax2.plot([], [], linestyle='-', linewidth=2)
+    n_recov, = ax2.plot([], [], linestyle='-', linewidth=2)
+
     def animate(i: int):
         healthy.set_data(x_healthy[i], y_healthy[i])
         inf.set_data(x_inf[i], y_inf[i])
+        n_inf.set_data(np.append(n_inf.get_data()[0], i), np.append(n_inf.get_data()[1], len(x_inf[i])/n_tot))
+        n_recov.set_data(np.append(n_recov.get_data()[0], i), np.append(n_recov.get_data()[1], n_rec[i]/n_tot))
         return healthy, inf
 
     ani = FuncAnimation(fig, animate, frames=range(len(x_healthy)), interval=100, repeat=False)
@@ -244,7 +260,9 @@ def show_simulation(x_healthy: List[float], y_healthy: List[float], x_inf: List[
 def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
     """
     Parameters:
-        n_rec (List[int]): number of recovered particles at each timestep
+        x_inf (List[float]): x-coordinate of infected particles at each timestep
+        n_rec (List[float]): number of recovered particles at each timestep
+        n_tot (int): total number of particles
     """
     plt.style.use('fivethirtyeight')
     timesteps = range(len(x_inf))
@@ -263,10 +281,10 @@ def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
 
 
 if __name__ == "__main__":
-    sim = Simulation(200, 1, 0.03, 0.2, 40)
+    sim = Simulation(100, 1, 0.05, 0.5, 40)
     x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
-    #show_simulation(x_healthy, y_healthy, x_inf, y_inf)
-    plot_infections(x_inf, n_rec, 200)
+    show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec, 400)
+    #plot_infections(x_inf, n_rec, 200)
     print('Reproductive Ratio (R0): %.2f' % r0)
     
     

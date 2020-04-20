@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 
 
 class Particle:
@@ -303,11 +304,49 @@ def plot_infections(x_inf: List[float], n_rec: List[float], n_tot: int):
     ax.set_ylim(0, 1.05)
     plt.show()
 
+def multi_sim(n: int, ninf: int, rad: float, speed: float, recovery_time: int, n_runs: int) -> Tuple[List[float], List[float]]:
+    """
+    """
+    n_inf_avg = np.zeros(50)
+    n_rec_avg = np.zeros(50)
+    for i in range(n_runs):
+        sim = Simulation(n, ninf, rad, speed, recovery_time)
+        _, _, x_inf, _, n_rec, _ = sim.run()
+        n_inf = [len(j) for j in x_inf]
+        
+        if len(n_rec) > len(n_rec_avg):
+            f1 = interp1d(np.linspace(0, 1, len(n_inf_avg)), n_inf_avg, kind='cubic')
+            n_inf_avg = f1(np.linspace(0, 1, len(n_inf)))
+
+            f2 = interp1d(np.linspace(0, 1, len(n_rec_avg)), n_rec_avg, kind='cubic')
+            n_rec_avg = f2(np.linspace(0, 1, len(n_rec)))
+        else:
+            f1 = interp1d(np.linspace(0, 1, len(n_inf)), n_inf, kind='cubic')
+            n_inf = f1(np.linspace(0, 1, len(n_inf_avg)))
+
+            f2 = interp1d(np.linspace(0, 1, len(n_rec)), n_rec, kind='cubic')
+            n_rec = f2(np.linspace(0, 1, len(n_rec_avg)))
+
+        n_inf_avg = [sum(i) for i in zip(n_inf, n_inf_avg)]
+        n_rec_avg = [sum(i) for i in zip(n_rec, n_rec_avg)]
+
+    n_inf_avg = [i/n_runs for i in n_inf_avg]
+    n_rec_avg = [i/n_runs for i in n_rec_avg]
+
+    return n_inf_avg, n_rec_avg
+
 
 if __name__ == "__main__":
     n_tot = 100
     sim = Simulation(n_tot, 10, 0.04, 0.5, 20)
-    x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
-    show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec, n_tot, r0)
+    #x_healthy, y_healthy, x_inf, y_inf, n_rec, r0 = sim.run()
+    #show_simulation(x_healthy, y_healthy, x_inf, y_inf, n_rec, n_tot, r0)
+    n_inf_avg, n_rec_avg = multi_sim(n_tot, 5, 0.04, 0.5, 20, 10)
+
+    plt.figure()
+    plt.plot(np.linspace(0, 1, len(n_inf_avg)), n_inf_avg)
+    plt.plot(np.linspace(0, 1, len(n_rec_avg)), n_rec_avg)
+    plt.show()
+
     
     
